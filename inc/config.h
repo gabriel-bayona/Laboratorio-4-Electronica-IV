@@ -21,9 +21,9 @@ SPDX-License-Identifier: MIT
 #define CONFIG_H_
 
 /** @file config.h
- ** @brief Plantilla que crea archivos de de cabeceras en C
- **/
-
+ *  @brief Configuración del hardware y macros para el proyecto.
+ *  @details Este archivo contiene las definiciones de los pines y configuraciones específicas del hardware.
+ */
 /* === Headers files inclusions ==================================================================================== */
 
 /* === Header for C++ compatibility ================================================================================ */

@@ -21,9 +21,9 @@ SPDX-License-Identifier: MIT
 #define BSP_H_
 
 /** @file bsp.h
- ** @brief 
+ ** @brief Declaraciones públicas para la placa de desarrollo.
+ ** @details Este archivo contiene las definiciones y declaraciones necesarias para manejar la placa de desarrollo.
  **/
-
 /* === Headers files inclusions ==================================================================================== */
 
 #include <stdint.h>
@@ -40,7 +40,7 @@ extern "C" {
 /* === Public macros definitions =================================================================================== */
 
 /* === Public data type declarations =============================================================================== */
-
+//! Estructura que representa la placa de desarrollo
 typedef struct Board_s{
     digital_output_t ledGreen;
     digital_output_t ledRed;
@@ -56,6 +56,11 @@ typedef struct Board_s{
 
 /* === Public function declarations ================================================================================ */
 
+/**
+ * @brief Crea e instancia la estructura que representa la placa de desarrollo.
+ * @return Un identificador para la placa de desarrollo.
+ * @note Esta función instancia la estructura y retorna su descriptor.
+ */
 Board_t BoardCreate(void);
 
 /* === End of conditional blocks =================================================================================== */

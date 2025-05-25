@@ -57,25 +57,81 @@ typedef struct digital_input_s * digital_input_t;
 
 /* === Public function declarations ================================================================================ */
 
-
+/**
+ * @brief Crea una salida digital.
+ * @param gpio El número del GPIO asociado a la salida.
+ * @param bit El bit específico del GPIO que se utilizará.
+ * @return Un identificador para la salida digital creada.
+ */
 digital_output_t DigitalOutputCreate(uint8_t gpio, uint8_t bit);
 
+/**
+ * @brief Libera los recursos asociados a una salida digital.
+ * @param output El identificador de la salida digital a liberar.
+ */
 void DigitalOutputActivate(digital_output_t output);
 
+/**
+ * @brief Activa una salida digital.
+ * @param output El identificador de la salida digital a activar.
+ */
 void DigitalOutputDeactivate(digital_output_t output);
 
+
+/**
+ * @brief Obtiene el estado actual de una salida digital.
+ * @param output El identificador de la salida digital.
+ * @return true si la salida está activa, false si está inactiva.
+ */
 void DigitalOutputToggle(digital_output_t output);
 
 
+/**
+ * @brief Crea una entrada digital.
+ * @param gpio El número del GPIO asociado a la entrada.
+ * @param bit El bit específico del GPIO que se utilizará.
+ * @param inverted Indica si la entrada está invertida (true) o no (false).
+ * @return Un identificador para la entrada digital creada.
+ */
 digital_input_t DigitalInputCreate(uint8_t gpio, uint8_t bit,bool inverted);
 
+
+/**
+ * @brief Permite saber si la entrada digital está activa.
+ *
+ * @param input Identificador de la entrada digital.
+ * @return true si la entrada está activa, false si está inactiva.
+ * @note La función devuelve true si la entrada está activa o false si está inactiva, sin importar si es de lógica invertida o no.
+ */
 bool DigitalInputGetIsActive(digital_input_t input);
 
+/**
+ * @brief Permite saber si la entrada digital está inactiva.
+ *
+ * @param input Identificador de la entrada digital.
+ * @return true si la entrada está inactiva, false si está activa.
+ * @note La función devuelve tun booleano.
+ */
 bool DigitalInputWasActivated(digital_input_t input);
 
+/**
+ * @brief Permite saber si la entrada digital fue desactivada.
+ *
+ * @param input Identificador de la entrada digital.
+ * @return true si la entrada fue desactivada, false si no.
+ * @note La función devuelve un booleano.
+ */
 bool DigitalInputWasDeactivated(digital_input_t input);
 
-
+/**
+ * @brief Permite saber si el estado de la entrada digital cambió.
+ *
+ * @param input Identificador de la entrada digital.
+ * @return Un valor de tipo digital_states_t que indica el estado de la entrada:
+ *         - DIGITAL_INPUT_WAS_DEACTIVATED: si la entrada fue desactivada.
+ *         - DIGITAL_INPUT_NO_CHANGE: si no hubo cambio en el estado.
+ *         - DIGITAL_INPUT_WAS_ACTIVATED: si la entrada fue activada.
+ */
 digital_states_t DigitalInputWasChanged(digital_input_t input);
 
 /* === End of conditional blocks =================================================================================== */
