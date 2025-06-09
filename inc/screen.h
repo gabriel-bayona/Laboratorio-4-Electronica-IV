@@ -48,14 +48,19 @@ extern "C" {
 
 /* === Public data type declarations =============================================================================== */
 
+//!< Estructura que representa la pantalla de 7 segmentos.
 typedef struct screen_s * screen_t; //
 
+//!< Controlador de dígitos. (Apaga todos los dígitos).
 typedef void (*digits_turn_off_t)(void);
 
+//!< Controlador de segmentos. (Actualiza los segmentos de un dígito específico).
 typedef void (*segments_update_t)(uint8_t);
 
+//!< Controlador de dígitos. (Enciende digitos).
 typedef void (*digit_turn_on_t)(uint8_t);
 
+//!< Estructura que representa un controlador de pantalla.
 typedef struct screen_driver_s {
     digits_turn_off_t DigitsTurnOff;
     segments_update_t SegmentsUpdate;
@@ -66,12 +71,44 @@ typedef struct screen_driver_s {
 
 /* === Public function declarations ================================================================================ */
 
-screen_t ScreenCreate(uint8_t digits, uint8_t dots, screen_driver_t driver); //
-void ScreenWriteBCD(screen_t screen, uint8_t * value, uint8_t size);         //
+/**
+ * @brief Crea e instancia una pantalla de 7 segmentos.
+ * @param digits Número de dígitos en la pantalla.
+ * @param dots Número de puntos en la pantalla.
+ * @param driver Controlador de pantalla.
+ * @return Un identificador para la pantalla creada.
+ */
+screen_t ScreenCreate(uint8_t digits, uint8_t dots, screen_driver_t driver);
+
+/**
+ * @brief Escribe un valor en formato BCD en la pantalla de 7 segmentos.
+ * @param screen Identificador de la pantalla.
+ * @param value Valor a escribir en formato BCD.
+ * @param size Número de dígitos a escribir.
+ */
+void ScreenWriteBCD(screen_t screen, uint8_t * value, uint8_t size);
+
+/**
+ * @brief Escribe un punto decimal en la pantalla de 7 segmentos.
+ * @details Esta función escribe un valor en formato decimal en la pantalla de 7 segmentos, permitiendo mostrar números
+ * con puntos decimales.
+ * @param screen Identificador de la pantalla.
+ * @param value_dot Puntero al valor a escribir en formato decimal.
+ * @param size Número de dígitos a escribir.
+ */
 void ScreenWriteDOT(screen_t screen, uint8_t * value_dot, uint8_t size);
+
+/**
+ * @brief refresca la pantalla de 7 segmentos.
+ * @param screen Identificador de la pantalla.
+ */
 void ScreenRefresh(screen_t screen); //
 
-int DisplayFlashDigits(screen_t screen, uint8_t from, uint8_t to, uint16_t divisor); //
+/**
+ * @brief Apaga todos los dígitos de la pantalla.
+ * @param screen Identificador de la pantalla.
+ */
+int DisplayFlashDigits(screen_t screen, uint8_t from, uint8_t to, uint16_t divisor);
 /* === End of conditional blocks =================================================================================== */
 #ifdef __cplusplus
 }

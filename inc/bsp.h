@@ -39,7 +39,7 @@ extern "C" {
 /* === Public macros definitions =================================================================================== */
 
 /* === Public data type declarations =============================================================================== */
-//! Estructura que representa la placa de desarrollo
+//! Estructura que representa la placa de desarrollo.
 typedef struct Board_s {
     digital_output_t buzzer;
     digital_input_t set_time;
