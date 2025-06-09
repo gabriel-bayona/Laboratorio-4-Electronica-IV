@@ -46,7 +46,6 @@
 #include "config.h"
 #include "bsp.h"
 
-
 /* === Private data type declarations ========================================================== */
 
 /* === Private variable declarations =========================================================== */
@@ -63,40 +62,26 @@
 
 int main(void) {
 
-    int divisor  = 0;
+    int divisor = 0;
+    uint8_t value[4] = {1, 2, 3, 4};
 
+    /* Initialize the board */
+    Board_t board = BoardCreate();
 
-    Board_t boardIO = BoardCreate();
+    ScreenWriteBCD(board->screen, value, sizeof(value));
+    //    ScreenFlashDigits(board->screen, 1, 2, 50);
 
     while (true) {
-        if (DigitalInputGetIsActive(boardIO->keyPush)) {
-             DigitalOutputActivate(boardIO->ledBlue);
-        } else {
-            DigitalOutputDeactivate(boardIO->ledBlue);
-        }
-
-        if (DigitalInputWasActivated(boardIO->keyToggle)) {
-            DigitalOutputToggle(boardIO->ledRed);
-        }
-
-        if (DigitalInputGetIsActive(boardIO->keyTurnOn)) {
-            DigitalOutputActivate(boardIO->ledYellow);
-        }
-        if (DigitalInputGetIsActive(boardIO->keyTurnOff)) {
-            DigitalOutputDeactivate(boardIO->ledYellow);
-        }
-        
 
         divisor++;
         if (divisor == 5) {
             divisor = 0;
-            DigitalOutputToggle(boardIO->ledGreen);
         }
 
-        for (int index = 0; index < 100; index++) {
-            for (int delay = 0; delay < 25000; delay++) {
-                __asm("NOP");
-            }
+        ScreenRefresh(board->screen);
+
+        for (int delay = 0; delay < 25000; delay++) {
+            __asm("NOP");
         }
     }
 }

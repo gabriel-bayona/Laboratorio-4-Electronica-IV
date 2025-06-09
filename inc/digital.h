@@ -19,7 +19,8 @@ SPDX-License-Identifier: MIT
 
 /** @file digital.h
  ** @brief Declaraciones públicas para la gestión de entradas y salidas digitales.
- ** @details Este archivo contiene las definiciones y declaraciones necesarias para manejar entradas y salidas digitales.
+ ** @details Este archivo contiene las definiciones y declaraciones necesarias para manejar entradas y salidas
+ *digitales.
  **/
 
 #ifndef DIGITAL_H_
@@ -44,13 +45,12 @@ typedef enum digital_states_e {
     DIGITAL_INPUT_WAS_DEACTIVATED = -1,
     DIGITAL_INPUT_NO_CHANGE = 0,
     DIGITAL_INPUT_WAS_ACTIVATED = 1,
-}digital_states_t;
-
+} digital_states_t;
 
 //! Estructura que representa una salida digital
 typedef struct digital_output_s * digital_output_t;
 
-//!Estructura que representa una entrada digital
+//! Estructura que representa una entrada digital
 typedef struct digital_input_s * digital_input_t;
 
 /* === Public variable declarations ================================================================================ */
@@ -77,14 +77,12 @@ void DigitalOutputActivate(digital_output_t output);
  */
 void DigitalOutputDeactivate(digital_output_t output);
 
-
 /**
  * @brief Obtiene el estado actual de una salida digital.
  * @param output El identificador de la salida digital.
  * @return true si la salida está activa, false si está inactiva.
  */
 void DigitalOutputToggle(digital_output_t output);
-
 
 /**
  * @brief Crea una entrada digital.
@@ -93,15 +91,15 @@ void DigitalOutputToggle(digital_output_t output);
  * @param inverted Indica si la entrada está invertida (true) o no (false).
  * @return Un identificador para la entrada digital creada.
  */
-digital_input_t DigitalInputCreate(uint8_t gpio, uint8_t bit,bool inverted);
-
+digital_input_t DigitalInputCreate(uint8_t gpio, uint8_t bit, bool inverted);
 
 /**
  * @brief Permite saber si la entrada digital está activa.
  *
  * @param input Identificador de la entrada digital.
  * @return true si la entrada está activa, false si está inactiva.
- * @note La función devuelve true si la entrada está activa o false si está inactiva, sin importar si es de lógica invertida o no.
+ * @note La función devuelve true si la entrada está activa o false si está inactiva, sin importar si es de lógica
+ * invertida o no.
  */
 bool DigitalInputGetIsActive(digital_input_t input);
 
