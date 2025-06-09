@@ -64,12 +64,14 @@ int main(void) {
 
     int divisor = 0;
     uint8_t value[4] = {1, 2, 3, 4};
+    uint8_t dots[4] = {0, 1, 0, 1};
 
     /* Initialize the board */
     Board_t board = BoardCreate();
 
     ScreenWriteBCD(board->screen, value, sizeof(value));
-    DisplayFlashDigits(board->screen, 1, 2, 50);
+    ScreenWriteDOT(board->screen, dots, sizeof(dots));
+    DisplayFlashDigits(board->screen, 0, 2, 50);
 
     while (true) {
 

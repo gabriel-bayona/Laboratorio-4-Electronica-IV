@@ -130,7 +130,7 @@ Board_t BoardCreate(void) {
     if (self != NULL) {
         DigitsInit();
         SegmentsInit();
-        self->screen = ScreenCreate(4, &display_driver);
+        self->screen = ScreenCreate(4, 4, &display_driver);
     }
     return self;
 }

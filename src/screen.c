@@ -36,6 +36,7 @@ SPDX-License-Identifier: MIT
 
 struct screen_s {
     uint8_t digits;
+    uint8_t dots; // Nuevo: número de puntos
     uint8_t currentDigit;
     uint8_t flashing_from;
     uint8_t flashing_to;
@@ -43,6 +44,7 @@ struct screen_s {
     uint16_t flashing_frequency;
     screen_driver_t driver;
     uint8_t value[SCREEN_MAX_DIGITS];
+    uint8_t value_dot[SCREEN_MAX_DIGITS]; // Nuevo: estado de los puntos
 };
 
 /* === Private function declarations =============================================================================== */
@@ -67,20 +69,21 @@ static const uint8_t IMAGES[10] = {
 
 /* === Public function implementation ============================================================================== */
 
-screen_t ScreenCreate(uint8_t digits, screen_driver_t driver) {
-    screen_t self = malloc(sizeof(struct screen_s));
+screen_t ScreenCreate(uint8_t digits, uint8_t dots, screen_driver_t driver) {
+    screen_t screen = malloc(sizeof(struct screen_s));
     if (digits > SCREEN_MAX_DIGITS) {
         digits = SCREEN_MAX_DIGITS;
     }
-    if (self != NULL) {
-        self->digits = digits;
-        self->driver = driver;
-        self->currentDigit = 0;
-        self->flashing_count = 0;
-        self->flashing_frequency = 0;
+    if (screen != NULL) {
+        screen->digits = digits;
+        screen->dots = dots;
+        screen->driver = driver;
+        screen->currentDigit = 0;
+        screen->flashing_count = 0;
+        screen->flashing_frequency = 0;
     }
 
-    return self;
+    return screen;
 }
 
 void ScreenWriteBCD(screen_t screen, uint8_t * value, uint8_t size) {
@@ -94,13 +97,28 @@ void ScreenWriteBCD(screen_t screen, uint8_t * value, uint8_t size) {
     }
 }
 
+void ScreenWriteDOT(screen_t screen, uint8_t * value_dot, uint8_t size) {
+    memset(screen->value_dot, 0, sizeof(screen->value_dot));
+
+    if (size > screen->dots) {
+        size = screen->dots;
+    }
+    for (uint8_t i = 0; i < size; i++) {
+        if (value_dot[i]) {
+            screen->value_dot[i] = SEGMENT_P; // Asignar el segmento del punto
+        }
+    }
+}
+
 void ScreenRefresh(screen_t screen) {
     uint8_t segments;
 
     screen->driver->DigitsTurnOff();
     screen->currentDigit = (screen->currentDigit + 1) % screen->digits;
 
-    segments = screen->value[screen->currentDigit];
+    // segments = screen->value[screen->currentDigit];
+    segments = screen->value[screen->currentDigit] | screen->value_dot[screen->currentDigit];
+
     if (screen->flashing_frequency != 0) {
         if (screen->currentDigit == 0) {
             screen->flashing_count = (screen->flashing_count + 1) % (screen->flashing_frequency);
