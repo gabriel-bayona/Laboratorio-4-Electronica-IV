@@ -69,7 +69,7 @@ int main(void) {
     Board_t board = BoardCreate();
 
     ScreenWriteBCD(board->screen, value, sizeof(value));
-    //    ScreenFlashDigits(board->screen, 1, 2, 50);
+    DisplayFlashDigits(board->screen, 1, 2, 50);
 
     while (true) {
 

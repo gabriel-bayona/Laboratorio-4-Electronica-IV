@@ -37,6 +37,10 @@ SPDX-License-Identifier: MIT
 struct screen_s {
     uint8_t digits;
     uint8_t currentDigit;
+    uint8_t flashing_from;
+    uint8_t flashing_to;
+    uint8_t flashing_count;
+    uint16_t flashing_frequency;
     screen_driver_t driver;
     uint8_t value[SCREEN_MAX_DIGITS];
 };
@@ -72,6 +76,8 @@ screen_t ScreenCreate(uint8_t digits, screen_driver_t driver) {
         self->digits = digits;
         self->driver = driver;
         self->currentDigit = 0;
+        self->flashing_count = 0;
+        self->flashing_frequency = 0;
     }
 
     return self;
@@ -89,10 +95,43 @@ void ScreenWriteBCD(screen_t screen, uint8_t * value, uint8_t size) {
 }
 
 void ScreenRefresh(screen_t screen) {
+    uint8_t segments;
+
     screen->driver->DigitsTurnOff();
     screen->currentDigit = (screen->currentDigit + 1) % screen->digits;
-    screen->driver->SegmentsUpdate(screen->value[screen->currentDigit]);
-    screen->driver->DigitTurnOn(screen->currentDigit);
+
+    segments = screen->value[screen->currentDigit];
+    if (screen->flashing_frequency != 0) {
+        if (screen->currentDigit == 0) {
+            screen->flashing_count = (screen->flashing_count + 1) % (screen->flashing_frequency);
+        }
+        if (screen->flashing_count < (screen->flashing_frequency / 2)) {
+            if (screen->currentDigit >= screen->flashing_from) {
+                if (screen->currentDigit <= screen->flashing_to) {
+                    segments = 0; // Flashing off
+                }
+            }
+        }
+
+        screen->driver->SegmentsUpdate(segments);
+        screen->driver->DigitTurnOn(screen->currentDigit);
+    }
 }
 
-/* === End of documentation ======================================================================================== */
+int DisplayFlashDigits(screen_t screen, uint8_t from, uint8_t to, uint16_t divisor) {
+    int result = 0;
+    if ((from > to) || (from >= SCREEN_MAX_DIGITS) || (to >= SCREEN_MAX_DIGITS)) {
+        result = -1;
+    } else if (!screen) {
+        result = -1;
+    } else {
+        screen->flashing_from = from;
+        screen->flashing_to = to;
+        screen->flashing_frequency = 2 * divisor;
+        screen->flashing_count = 0;
+    }
+    return result;
+}
+
+/* === End of documentation ========================================================================================
+ */
