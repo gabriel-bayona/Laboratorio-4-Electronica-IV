@@ -68,12 +68,15 @@ digital_output_t DigitalOutputCreate(uint8_t gpio, uint8_t bit, bool inverted);
 /**
  * @brief Libera los recursos asociados a una salida digital.
  * @param output El identificador de la salida digital a liberar.
+ * @note Esta función libera la memoria utilizada por la salida digital.
  */
 void DigitalOutputActivate(digital_output_t output);
 
 /**
  * @brief Activa una salida digital.
  * @param output El identificador de la salida digital a activar.
+ * @note Esta función configura el estado de la salida digital a activo (1).
+ * @note Si la salida está invertida, se activa con un valor lógico bajo (0).
  */
 void DigitalOutputDeactivate(digital_output_t output);
 
@@ -108,6 +111,7 @@ bool DigitalInputGetIsActive(digital_input_t input);
  *
  * @param input Identificador de la entrada digital.
  * @return true si la entrada está inactiva, false si está activa.
+ *
  * @note La función devuelve tun booleano.
  */
 bool DigitalInputWasActivated(digital_input_t input);
