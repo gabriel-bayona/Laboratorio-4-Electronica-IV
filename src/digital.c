@@ -70,11 +70,11 @@ digital_output_t DigitalOutputCreate(uint8_t gpio, uint8_t bit, bool inverted) {
 }
 
 void DigitalOutputActivate(digital_output_t self) {
-    Chip_GPIO_SetPinState(LPC_GPIO_PORT, self->gpio, self->bit, !self->inverted);
+    Chip_GPIO_SetPinState(LPC_GPIO_PORT, self->gpio, self->bit, self->inverted);
 }
 
 void DigitalOutputDeactivate(digital_output_t self) {
-    Chip_GPIO_SetPinState(LPC_GPIO_PORT, self->gpio, self->bit, self->inverted);
+    Chip_GPIO_SetPinState(LPC_GPIO_PORT, self->gpio, self->bit, !self->inverted);
 }
 
 void DigitalOutputToggle(digital_output_t self) {

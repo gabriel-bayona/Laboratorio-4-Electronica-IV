@@ -77,33 +77,39 @@ int main(void) {
 
     while (true) {
 
-        // if (DigitalInputGetIsActive(board->set_time)) {
-        //     DigitalOutputActivate(board->buzzer);
-        // } else {
-        //     DigitalOutputDeactivate(board->buzzer);
-        // }
-        if (DigitalInputGetIsActive(board->set_alarm)) {
+        if (DigitalInputGetIsActive(board->accept)) {
+            DigitalOutputActivate(board->led_blue);
+        } else {
+            DigitalOutputDeactivate(board->led_blue);
+        }
+
+        if (DigitalInputGetIsActive(board->cancel)) {
             DigitalOutputActivate(board->led_green);
         } else {
             DigitalOutputDeactivate(board->led_green);
         }
 
-        if (DigitalInputWasActivated(board->decrement)) {
-            DigitalOutputToggle(board->led_red);
+        if (DigitalInputGetIsActive(board->increment)) {
+            DigitalOutputActivate(board->led_blue);
         } else {
-            DigitalOutputDeactivate(board->led_red);
+            DigitalOutputDeactivate(board->led_green);
         }
 
-        if (DigitalInputWasActivated(board->increment)) {
-            DigitalOutputToggle(board->led_blue);
+        if (DigitalInputGetIsActive(board->decrement)) {
+            DigitalOutputActivate(board->led_blue);
         } else {
             DigitalOutputDeactivate(board->led_blue);
         }
 
-        if (DigitalInputGetIsActive(board->accept)) {
+        if (DigitalInputGetIsActive(board->set_time)) {
             DigitalOutputActivate(board->led_blue);
+        } else {
+            DigitalOutputDeactivate(board->led_blue);
         }
-        if (DigitalInputGetIsActive(board->cancel)) {
+
+        if (DigitalInputGetIsActive(board->set_alarm)) {
+            DigitalOutputActivate(board->led_blue);
+        } else {
             DigitalOutputDeactivate(board->led_blue);
         }
 
