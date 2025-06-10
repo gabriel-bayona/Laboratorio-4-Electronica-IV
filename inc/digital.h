@@ -61,6 +61,7 @@ typedef struct digital_input_s * digital_input_t;
  * @brief Crea una salida digital.
  * @param gpio El número del GPIO asociado a la salida.
  * @param bit El bit específico del GPIO que se utilizará.
+ * @param inverted Indica si la salida está invertida (true) o no (false).
  * @return Un identificador para la salida digital creada.
  */
 digital_output_t DigitalOutputCreate(uint8_t gpio, uint8_t bit, bool inverted);
