@@ -132,6 +132,39 @@ Board_t BoardCreate(void) {
         SegmentsInit();
         self->screen = ScreenCreate(4, 4, &display_driver);
     }
+
+    // Salidas digitales
+    Chip_SCU_PinMuxSet(PONCHO_RGB_RED_PORT, PONCHO_RGB_RED_PIN,
+                       SCU_MODE_INBUFF_EN | SCU_MODE_INACT | PONCHO_RGB_RED_FUNC);
+    self->led_red = DigitalOutputCreate(PONCHO_RGB_RED_GPIO, PONCHO_RGB_RED_BIT, true);
+
+    Chip_SCU_PinMuxSet(PONCHO_RGB_GREEN_PORT, PONCHO_RGB_GREEN_PIN,
+                       SCU_MODE_INBUFF_EN | SCU_MODE_INACT | PONCHO_RGB_GREEN_FUNC);
+    self->led_green = DigitalOutputCreate(PONCHO_RGB_GREEN_GPIO, PONCHO_RGB_GREEN_BIT, true);
+
+    Chip_SCU_PinMuxSet(PONCHO_RGB_BLUE_PORT, PONCHO_RGB_BLUE_PIN,
+                       SCU_MODE_INBUFF_EN | SCU_MODE_INACT | PONCHO_RGB_BLUE_FUNC);
+    self->led_blue = DigitalOutputCreate(PONCHO_RGB_BLUE_GPIO, PONCHO_RGB_BLUE_BIT, true);
+
+    // entradas digitales
+    Chip_SCU_PinMuxSet(KEY_F1_PORT, KEY_F1_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_INACT | KEY_F1_FUNC);
+    self->increment = DigitalInputCreate(KEY_F1_GPIO, KEY_F1_BIT, true);
+
+    Chip_SCU_PinMuxSet(KEY_F2_PORT, KEY_F2_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_INACT | KEY_F2_FUNC);
+    self->decrement = DigitalInputCreate(KEY_F2_GPIO, KEY_F2_BIT, true);
+
+    Chip_SCU_PinMuxSet(KEY_F3_PORT, KEY_F3_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_INACT | KEY_F3_FUNC);
+    self->set_time = DigitalInputCreate(KEY_F3_GPIO, KEY_F3_BIT, true);
+
+    Chip_SCU_PinMuxSet(KEY_F4_PORT, KEY_F4_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_INACT | KEY_F4_FUNC);
+    self->set_alarm = DigitalInputCreate(KEY_F4_GPIO, KEY_F4_BIT, true);
+
+    Chip_SCU_PinMuxSet(KEY_ACCEPT_PORT, KEY_ACCEPT_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_INACT | KEY_ACCEPT_FUNC);
+    self->accept = DigitalInputCreate(KEY_ACCEPT_GPIO, KEY_ACCEPT_BIT, true);
+
+    Chip_SCU_PinMuxSet(KEY_CANCEL_PORT, KEY_CANCEL_PIN, SCU_MODE_INBUFF_EN | SCU_MODE_INACT | KEY_CANCEL_FUNC);
+    self->cancel = DigitalInputCreate(KEY_CANCEL_GPIO, KEY_CANCEL_BIT, true);
+
     return self;
 }
 /* === End of documentation ======================================================================================== */

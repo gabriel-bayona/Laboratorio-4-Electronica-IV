@@ -48,6 +48,10 @@ typedef struct Board_s {
     digital_input_t increment;
     digital_input_t accept;
     digital_input_t cancel;
+    digital_output_t led_red;
+    digital_output_t led_green;
+    digital_output_t led_blue;
+
     screen_t screen;
 } const * const Board_t;
 /* === Public variable declarations ================================================================================ */

@@ -45,6 +45,8 @@
 #include "digital.h"
 #include "config.h"
 #include "bsp.h"
+#include "screen.h"
+#include "poncho.h"
 
 /* === Private data type declarations ========================================================== */
 
@@ -74,6 +76,36 @@ int main(void) {
     DisplayFlashDigits(board->screen, 0, 2, 50);
 
     while (true) {
+
+        // if (DigitalInputGetIsActive(board->set_time)) {
+        //     DigitalOutputActivate(board->buzzer);
+        // } else {
+        //     DigitalOutputDeactivate(board->buzzer);
+        // }
+        if (DigitalInputGetIsActive(board->set_alarm)) {
+            DigitalOutputActivate(board->led_green);
+        } else {
+            DigitalOutputDeactivate(board->led_green);
+        }
+
+        if (DigitalInputWasActivated(board->decrement)) {
+            DigitalOutputToggle(board->led_red);
+        } else {
+            DigitalOutputDeactivate(board->led_red);
+        }
+
+        if (DigitalInputWasActivated(board->increment)) {
+            DigitalOutputToggle(board->led_blue);
+        } else {
+            DigitalOutputDeactivate(board->led_blue);
+        }
+
+        if (DigitalInputGetIsActive(board->accept)) {
+            DigitalOutputActivate(board->led_blue);
+        }
+        if (DigitalInputGetIsActive(board->cancel)) {
+            DigitalOutputDeactivate(board->led_blue);
+        }
 
         divisor++;
         if (divisor == 5) {
