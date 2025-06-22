@@ -48,9 +48,13 @@ typedef union {
 
 typedef struct clock_s * clock_t;
 
-clock_t ClockCreate(void);
+clock_t ClockCreate(uint8_t ticks_per_second);
 
 bool ClockGetTime(clock_t clock, clock_time_t * result);
+
+bool ClockSetTime(clock_t clock, const clock_time_t * new_time);
+
+void ClockNewTick(clock_t clock);
 
 /* === Public variable declarations ================================================================================ */
 

@@ -22,43 +22,105 @@ SPDX-License-Identifier: MIT
  ** @brief
  **/
 
+//(SI) Al inicializar el reloj está en 00:00 y con hora invalida.
+// (SI)‣ Al ajustar la hora el reloj con valores correctos queda en hora y es válida.
+// (NO)‣ Después de n ciclos de reloj la hora avanza un segundo, diez segundos, un minutos, diez minutos, una hora, diez
+// horas y un día completo.
+//(NO)‣ Fijar la hora de la alarma y consultarla.
+// (NO)‣ Fijar la alarma y avanzar el reloj para que suene.
+//(NO) ‣ Fijar la alarma, deshabilitarla y avanzar el reloj para no suene.
+// (NO) Hacer sonar la alarma y posponerla.
+//(NO) Hacer sonar la alarma y cancelarla hasta el otro dia..
+// (NO) Probar get_time y con NULL como argumento
+// (NO) Tratar de ajustar la hora con un valor inválido y que los rechace
+// (NO) Hacer una prueba con una frecuencia de reloj diferente.
 // Al inicializar el reloj está en 00:00 y con hora invalida.
-// ‣ Al ajustar la hora el reloj queda en hora y es válida.
-// ‣ Después de n ciclos de reloj la hora avanza un segundo, diez
-// segundos, un minutos, diez minutos, una hora, diez horas y
-// un día completo.
-// ‣ Fijar la hora de la alarma y consultarla.
-// ‣ Fijar la alarma y avanzar el reloj para que suene.
-// ‣ Fijar la alarma, deshabilitarla y avanzar el reloj para no
-// suene.
-// ‣ Hacer sonar la alarma y posponerla.
-// ‣ Hacer sonar la alarma y cancelarla hasta el otro dia..
-// ‣ Probar get_time y con NULL como argumento.
-
-// Al inicializar el reloj está en 00:00 y con hora invalida.
-
 /* === Headers files inclusions ==================================================================================== */
 #include "unity.h"
 #include "clock.h"
-/* === Headers files inclusions ==================================================================================== */
+/* === Headers files inclusions ====================================================================================
+ */
+/* === Private macros definitions ================================================================================ */
+#define CLOCK_TICKS_PER_SECOND 5 // Frecuencia del reloj simulado en Hz
+/* === Private data type declarations ============================================================================== */
 
-/* === Header for C++ compatibility ================================================================================ */
+/* === Private function declarations =============================================================================== */
+void SimulateSeconds(clock_t clock, uint8_t seconds);
+/* === Private variable definitions ================================================================================ */
 
-/* === Public macros definitions =================================================================================== */
+/* === Public variable definitions ================================================================================= */
 
-/* === Public data type declarations =============================================================================== */
+/* === Private function definitions ================================================================================ */
+void SimulateSeconds(clock_t clock, uint8_t seconds) {
+    for (uint8_t i = 0; i < CLOCK_TICKS_PER_SECOND * seconds; i++) {
+        ClockNewTick(clock); // Simula un tic del reloj
+    }
+}
+/* === Header for C++ compatibility ================================================================================
+ */
 
-/* === Public variable declarations ================================================================================ */
+/* === Public macros definitions ===================================================================================
+ */
 
-/* === Public function declarations ================================================================================ */
+/* === Public data type declarations ===============================================================================
+ */
+
+/* === Public variable declarations ================================================================================
+ */
+
+/* === Public function declarations ================================================================================
+ */
+
+// Al inicializar el reloj está en 00:00 y con hora invalida.
 void test_set_up_with_invalid_time(void) {
     clock_time_t current_time = {
         .bcd = {1, 2, 3, 4, 5, 6},
     };
 
-    clock_t clock = ClockCreate();
+    clock_t clock = ClockCreate(CLOCK_TICKS_PER_SECOND);
     TEST_ASSERT_FALSE(ClockGetTime(clock, &current_time));
     TEST_ASSERT_EACH_EQUAL_UINT8(0, current_time.bcd, 6);
+}
+
+// Al ajustar la hora el reloj con valores correctos queda en hora y es válida.
+void test_set_up_and_adjust_with_valid_time(void) {
+    static const clock_time_t new_time = {
+        .time =
+            {
+                .seconds = {4, 5},
+                .minutes = {3, 0},
+                .hours = {1, 4},
+            },
+    };
+    clock_time_t current_time = {0};
+
+    clock_t clock = ClockCreate(CLOCK_TICKS_PER_SECOND);
+    TEST_ASSERT_TRUE(ClockSetTime(clock, &new_time));
+    TEST_ASSERT_TRUE(ClockGetTime(clock, &current_time));
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(new_time.bcd, current_time.bcd, 6);
+}
+
+// Después de n ciclos de reloj la hora avanza un segundo, diez segundos, un minutos, diez minutos, una hora, diez horas
+// y un día completo.
+void clock_advance_one_second(void) {
+    clock_time_t current_time = {0};
+
+    static const clock_time_t expected_value = {
+        .time =
+            {
+                .seconds = {1, 0},
+                .minutes = {0, 0},
+                .hours = {0, 0},
+            },
+    };
+
+    clock_t clock = ClockCreate(CLOCK_TICKS_PER_SECOND); // Simulando un reloj con una frecuencia de 5Hz
+
+    ClockSetTime(clock, &(clock_time_t){0}); // aca no se verificada nada, es parte de las precondiciones
+    SimulateSeconds(clock, 1);               // Simula un segundo
+    ClockGetTime(clock, &current_time);
+    //    TEST_ASSERT_EQUAL_UINT8_ARRAY(expected_value.bcd, current_time.bcd, 6);
+    TEST_ASSERT_EQUAL_MEMORY(&expected_value, &current_time, sizeof(clock_time_t));
 }
 
 /* === End of conditional blocks =================================================================================== */

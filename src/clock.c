@@ -36,15 +36,33 @@ SPDX-License-Identifier: MIT
 /* === Public variable declarations ================================================================================ */
 
 /* === Public function declarations ================================================================================ */
-clock_t ClockCreate(void) {
-    return NULL;
+
+struct clock_s {
+    clock_time_t current_time;
+    bool valid;
+};
+
+clock_t ClockCreate(uint8_t ticks_per_second) {
+    (void)ticks_per_second; // Evita advertencias de compilación si no se usa
+    static struct clock_s self[1];
+    memset(self, 0, sizeof(struct clock_s));
+    self->valid = false;
+    return self;
 }
 
-bool ClockGetTime(clock_t clock, clock_time_t * result) {
+bool ClockGetTime(clock_t self, clock_time_t * result) {
+    memcpy(result, &self->current_time, sizeof(clock_time_t));
+    return self->valid;
+}
 
-    memset(result, 0, 6);
-    (void)clock; // Suppress unused parameter
+bool ClockSetTime(clock_t self, const clock_time_t * new_time) {
+    self->valid = true;
+    memcpy(&self->current_time, new_time, sizeof(clock_time_t));
+    return self->valid; // siempre devuelve true
+}
 
-    return false;
+void ClockNewTick(clock_t self) {
+    //(void)self; // Evita advertencias de compilación si no se usa
+    self->current_time.time.seconds[0] = 1; // Simula un segundo
 }
 /* === End of conditional blocks =================================================================================== */
