@@ -38,6 +38,7 @@ SPDX-License-Identifier: MIT
 /* === Public function declarations ================================================================================ */
 
 struct clock_s {
+    uint16_t clock_ticks;
     clock_time_t current_time;
     bool valid;
 };
@@ -63,6 +64,16 @@ bool ClockSetTime(clock_t self, const clock_time_t * new_time) {
 
 void ClockNewTick(clock_t self) {
     //(void)self; // Evita advertencias de compilación si no se usa
-    self->current_time.time.seconds[0] = 1; // Simula un segundo
+    //  self->current_time.time.seconds[0] = 0; // Simula un segundo
+
+    self->clock_ticks++;
+    if (self->clock_ticks == 5) { // Simula un segundo si la frecuencia es de 5 Hz
+        self->clock_ticks = 0;    // Reinicia el contador de ticks
+        self->current_time.time.seconds[0]++;
+        if (self->current_time.time.seconds[0] > 9) {
+            self->current_time.time.seconds[0] = 0;
+            self->current_time.time.seconds[1] = 1;
+        }
+    }
 }
 /* === End of conditional blocks =================================================================================== */
