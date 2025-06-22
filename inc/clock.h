@@ -54,7 +54,17 @@ bool ClockGetTime(clock_t clock, clock_time_t * result);
 
 bool ClockSetTime(clock_t clock, const clock_time_t * new_time);
 
+bool ClockSetAlarmTime(clock_t clock, const clock_time_t * alarm_time);
+
 void ClockNewTick(clock_t clock);
+
+bool ClockGetAlarmTime(clock_t clock, clock_time_t * alarm_time);
+
+void ClockEnableAlarm(clock_t clock);
+
+void ClockDisableAlarm(clock_t clock);
+
+bool ClockIsAlarmEnabled(clock_t clock);
 
 /* === Public variable declarations ================================================================================ */
 

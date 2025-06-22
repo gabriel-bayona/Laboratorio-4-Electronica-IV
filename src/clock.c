@@ -41,6 +41,11 @@ struct clock_s {
     uint16_t clock_ticks;
     clock_time_t current_time;
     bool valid;
+
+    // De aca en adelante es parte de la alarma
+    clock_time_t alarm_time;
+    bool alarm_enabled;
+    bool alarm_triggered; // Indica si la alarma esta sonando o no
 };
 
 clock_t ClockCreate(uint8_t ticks_per_second) {
@@ -76,4 +81,39 @@ void ClockNewTick(clock_t self) {
         }
     }
 }
+
+// Guarda una copia de la hora de la alarma (alarm_time) en el reloj.
+bool ClockSetAlarmTime(clock_t self, const clock_time_t * alarm_time) {
+    if (!self || !alarm_time) {
+        return false;
+    }
+    memcpy(&self->alarm_time, alarm_time, sizeof(clock_time_t));
+    return true;
+}
+
+// Obtiene la hora de la alarma (alarm_time) del reloj y la almacena en alarm_time.
+bool ClockGetAlarmTime(clock_t self, clock_time_t * alarm_time) {
+    if (!self || !alarm_time) {
+        return false;
+    }
+    memcpy(alarm_time, &self->alarm_time, sizeof(clock_time_t));
+    return true;
+}
+
+void ClockEnableAlarm(clock_t self) {
+    if (self) {
+        self->alarm_enabled = true;
+    }
+}
+
+void ClockDisableAlarm(clock_t self) {
+    if (self) {
+        self->alarm_enabled = false;
+    }
+}
+
+bool ClockIsAlarmEnabled(clock_t self) {
+    return self ? self->alarm_enabled : false;
+}
+
 /* === End of conditional blocks =================================================================================== */

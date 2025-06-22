@@ -64,7 +64,7 @@ static void SimulateSeconds(clock_t clock, uint8_t seconds);
 
 /* === Private function definitions ================================================================================ */
 static void SimulateSeconds(clock_t clock, uint8_t seconds) {
-    for (uint8_t i = 0; i < CLOCK_TICKS_PER_SECOND * seconds; i++) {
+    for (uint32_t i = 0; i < CLOCK_TICKS_PER_SECOND * seconds; i++) {
         ClockNewTick(clock); // Simula un tic del reloj
     }
 }
@@ -132,6 +132,41 @@ void test_clock_advance_ten_seconds(void) {
     ClockSetTime(clock, &(clock_time_t){0}); // aca no se verificada nada, es parte de las precondiciones
     SimulateSeconds(clock, 10);              // Simula diez segundos
     TEST_ASSERT_TIME(0, 0, 0, 0, 1, 0, current_time);
+}
+
+void test_set_and_get_alarm_time(void) {
+    static const clock_time_t alarm_time = {
+        .time =
+            {
+                .seconds = {0, 0},
+                .minutes = {5, 1},
+                .hours = {2, 0},
+            },
+    };
+
+    clock_time_t retrieved = {0}; // la hora de la alarma recuperada desde el reloj.
+
+    // Seteamos la alarma
+    TEST_ASSERT_TRUE(ClockSetAlarmTime(clock, &alarm_time));
+
+    // Llamo a ClockGetAlarmTime() y espero que me copie en retrieved la hora que antes guardé con ClockSetAlarmTime()
+    TEST_ASSERT_TRUE(ClockGetAlarmTime(clock, &retrieved));
+
+    // Verifico que la hora de la alarma recuperada sea igual a la seteada
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(alarm_time.bcd, retrieved.bcd, sizeof(clock_time_t));
+}
+
+void test_enable_disable_alarm(void) {
+    // Por defecto debería estar deshabilitada
+    TEST_ASSERT_FALSE(ClockIsAlarmEnabled(clock));
+
+    // Habilito la alarma
+    ClockEnableAlarm(clock);
+    TEST_ASSERT_TRUE(ClockIsAlarmEnabled(clock));
+
+    // Deshabilito la alarma
+    ClockDisableAlarm(clock);
+    TEST_ASSERT_FALSE(ClockIsAlarmEnabled(clock));
 }
 
 /* === End of conditional blocks =================================================================================== */
