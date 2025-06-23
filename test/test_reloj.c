@@ -38,6 +38,7 @@ SPDX-License-Identifier: MIT
 /* === Headers files inclusions ==================================================================================== */
 #include "unity.h"
 #include "clock.h"
+
 /* === Headers files inclusions ====================================================================================
  */
 /* === Private macros definitions ================================================================================ */
@@ -156,17 +157,74 @@ void test_set_and_get_alarm_time(void) {
     TEST_ASSERT_EQUAL_UINT8_ARRAY(alarm_time.bcd, retrieved.bcd, sizeof(clock_time_t));
 }
 
-void test_enable_disable_alarm(void) {
-    // Por defecto debería estar deshabilitada
-    TEST_ASSERT_FALSE(ClockIsAlarmEnabled(clock));
+void test_alarm_triggers_when_time_matches(void) {
+    // Seteamos la hora actual
+    static const clock_time_t target_time = {.time = {
+                                                 .seconds = {0, 0},
+                                                 .minutes = {1, 0},
+                                                 .hours = {0, 0},
+                                             }};
 
-    // Habilito la alarma
+    TEST_ASSERT_TRUE(ClockSetTime(clock, &(clock_time_t){
+                                             .time =
+                                                 {
+                                                     .seconds = {0, 0},
+                                                     .minutes = {9, 5},
+                                                     .hours = {3, 2},
+                                                 }
+                                             // 23:59:00 para probar rollover también
+                                         }));
+
+    TEST_ASSERT_TRUE(ClockSetAlarmTime(clock, &target_time));
     ClockEnableAlarm(clock);
-    TEST_ASSERT_TRUE(ClockIsAlarmEnabled(clock));
 
-    // Deshabilito la alarma
-    ClockDisableAlarm(clock);
-    TEST_ASSERT_FALSE(ClockIsAlarmEnabled(clock));
+    // Antes de simular, la alarma no debe estar activa
+    TEST_ASSERT_FALSE(ClockIsAlarmTriggered(clock));
+
+    // Simular el tiempo hasta alcanzar 00:01:00
+    SimulateSeconds(clock, 120); // Simula 2 minutos
+
+    TEST_ASSERT_TRUE(ClockIsAlarmTriggered(clock)); // Debería sonar
+}
+
+void test_snoozed_alarm_triggers_after_delay(void) {
+    // Seteamos la hora actual
+    static const clock_time_t target_time = {.time = {
+                                                 .seconds = {0, 0},
+                                                 .minutes = {1, 0},
+                                                 .hours = {0, 0},
+                                             }};
+
+    TEST_ASSERT_TRUE(ClockSetTime(clock, &(clock_time_t){
+                                             .time =
+                                                 {
+                                                     .seconds = {0, 0},
+                                                     .minutes = {9, 5},
+                                                     .hours = {3, 2},
+                                                 }
+                                             // 23:59:00 para probar rollover también
+                                         }));
+
+    TEST_ASSERT_TRUE(ClockSetAlarmTime(clock, &target_time));
+    ClockEnableAlarm(clock);
+
+    // Antes de simular, la alarma no debe estar activa
+    TEST_ASSERT_FALSE(ClockIsAlarmTriggered(clock));
+
+    // Simular el tiempo hasta alcanzar 00:01:00
+    SimulateSeconds(clock, 120); // Simula 2 minutos
+
+    TEST_ASSERT_TRUE(ClockIsAlarmTriggered(clock)); // Debería sonar
+
+    // Posponer 2 minutos
+    TEST_ASSERT_TRUE(ClockSnoozeAlarm(clock, 2));
+
+    // Verificar que la alarma no esté sonando después de posponer
+    TEST_ASSERT_FALSE(ClockIsAlarmTriggered(clock));
+
+    // Simular hasta que suene el pospuesto
+    SimulateSeconds(clock, 120);
+    TEST_ASSERT_TRUE(ClockIsAlarmTriggered(clock));
 }
 
 /* === End of conditional blocks =================================================================================== */

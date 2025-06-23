@@ -37,6 +37,10 @@ extern "C" {
 /* === Public macros definitions =================================================================================== */
 
 /* === Public data type declarations =============================================================================== */
+/* @brief Estructura que representa el reloj.
+ * Contiene la hora actual, la hora de la alarma, y el estado de la alarma.
+
+ */
 typedef union {
     struct {
         uint8_t seconds[2];
@@ -66,6 +70,11 @@ void ClockDisableAlarm(clock_t clock);
 
 bool ClockIsAlarmEnabled(clock_t clock);
 
+bool ClockIsAlarmTriggered(clock_t clock);
+
+bool ClockTimesMatch(const clock_time_t * a, const clock_time_t * b);
+
+bool ClockSnoozeAlarm(clock_t self, uint8_t minutes_to_snooze);
 /* === Public variable declarations ================================================================================ */
 
 /* === Public function declarations ================================================================================ */
