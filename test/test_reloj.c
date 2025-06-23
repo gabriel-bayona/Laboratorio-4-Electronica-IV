@@ -22,15 +22,6 @@ SPDX-License-Identifier: MIT
  ** @brief
  **/
 
-//(SI) Al inicializar el reloj está en 00:00 y con hora invalida.
-// (SI)‣ Al ajustar la hora el reloj con valores correctos queda en hora y es válida.
-// (NO)‣ Después de n ciclos de reloj la hora avanza un segundo, diez segundos, un minutos, diez minutos, una hora, diez
-// horas y un día completo.
-//(NO)‣ Fijar la hora de la alarma y consultarla.
-// (NO)‣ Fijar la alarma y avanzar el reloj para que suene.
-//(NO) ‣ Fijar la alarma, deshabilitarla y avanzar el reloj para no suene.
-// (NO) Hacer sonar la alarma y posponerla.
-//(NO) Hacer sonar la alarma y cancelarla hasta el otro dia..
 // (NO) Probar get_time y con NULL como argumento
 // (NO) Tratar de ajustar la hora con un valor inválido y que los rechace
 // (NO) Hacer una prueba con una frecuencia de reloj diferente.
@@ -58,13 +49,13 @@ SPDX-License-Identifier: MIT
 /* === Private data type declarations ============================================================================== */
 
 /* === Private function declarations =============================================================================== */
-static void SimulateSeconds(clock_t clock, uint8_t seconds);
+static void SimulateSeconds(clock_t clock, uint32_t seconds);
 /* === Private variable definitions ================================================================================ */
 
 /* === Public variable definitions ================================================================================= */
 
 /* === Private function definitions ================================================================================ */
-static void SimulateSeconds(clock_t clock, uint8_t seconds) {
+static void SimulateSeconds(clock_t clock, uint32_t seconds) {
     for (uint32_t i = 0; i < CLOCK_TICKS_PER_SECOND * seconds; i++) {
         ClockNewTick(clock); // Simula un tic del reloj
     }
@@ -90,7 +81,7 @@ void setUp(void) {
     clock = ClockCreate(CLOCK_TICKS_PER_SECOND); // Crea el reloj con la frecuencia especificada
 }
 
-// Al inicializar el reloj está en 00:00 y con hora invalida.
+// (SI) Al inicializar el reloj está en 00:00 y con hora invalida.
 void test_set_up_with_invalid_time(void) {
     clock_time_t current_time = {
         .bcd = {1, 2, 3, 4, 5, 6},
@@ -101,7 +92,7 @@ void test_set_up_with_invalid_time(void) {
     TEST_ASSERT_EACH_EQUAL_UINT8(0, current_time.bcd, 6);
 }
 
-// Al ajustar la hora el reloj con valores correctos queda en hora y es válida.
+// (SI)‣Al ajustar la hora el reloj con valores correctos queda en hora y es válida.
 void test_set_up_and_adjust_with_valid_time(void) {
     static const clock_time_t new_time = {
         .time =
@@ -116,25 +107,49 @@ void test_set_up_and_adjust_with_valid_time(void) {
     TEST_ASSERT_TIME(1, 5, 0, 3, 5, 4, current_time);
 }
 
-// Después de n ciclos de reloj la hora avanza un segundo, diez segundos, un minutos, diez minutos, una hora, diez horas
+// Después de n ciclos de reloj la hora avanza un segundo, diez segundos, un minuto, diez minutos, una hora, diez horas
 // y un día completo.
 void test_clock_advance_one_second(void) {
-
     ClockSetTime(clock, &(clock_time_t){0}); // aca no se verificada nada, es parte de las precondiciones
-    SimulateSeconds(clock, 1);               // Simula un segundo
 
+    // un segundo
+    SimulateSeconds(clock, 1); // Simula un segundo
     TEST_ASSERT_TIME(0, 0, 0, 0, 0, 1, current_time);
-    // After simulating one second, the expected BCD values are: seconds_units=1, seconds_tens=0, minutes_units=0,
-    // minutes_tens=0, hours_units=0, hours_tens=0 (i.e., 00:00:01)
 }
-
 void test_clock_advance_ten_seconds(void) {
 
     ClockSetTime(clock, &(clock_time_t){0}); // aca no se verificada nada, es parte de las precondiciones
     SimulateSeconds(clock, 10);              // Simula diez segundos
     TEST_ASSERT_TIME(0, 0, 0, 0, 1, 0, current_time);
 }
+void test_clock_advance_one_minute(void) {
+    ClockSetTime(clock, &(clock_time_t){0}); // aca no se verificada nada, es parte de las precondiciones
+    SimulateSeconds(clock, 60);              // Simula un minuto
+    TEST_ASSERT_TIME(0, 0, 0, 1, 0, 0, current_time);
+}
+void test_clock_advance_ten_minutes(void) {
+    ClockSetTime(clock, &(clock_time_t){0}); // aca no se verificada nada, es parte de las precondiciones
+    SimulateSeconds(clock, 600);             // Simula diez minutos
+    TEST_ASSERT_TIME(0, 0, 1, 0, 0, 0, current_time);
+}
+void test_clock_advance_one_hour(void) {
+    ClockSetTime(clock, &(clock_time_t){0}); // aca no se verificada nada, es parte de las precondiciones
+    SimulateSeconds(clock, 3600);            // Simula una hora
+    TEST_ASSERT_TIME(0, 1, 0, 0, 0, 0, current_time);
+}
+void test_clock_advance_ten_hours(void) {
+    ClockSetTime(clock, &(clock_time_t){0}); // aca no se verificada nada, es parte de las precondiciones
+    SimulateSeconds(clock, 36000);           // Simula diez horas
+    TEST_ASSERT_TIME(1, 0, 0, 0, 0, 0, current_time);
+}
+void test_clock_advance_one_day(void) {
+    ClockSetTime(clock, &(clock_time_t){0}); // aca no se verificada nada, es parte de las precondiciones
 
+    SimulateSeconds(clock, 86400); // Simula un día completo (24 horas)
+    TEST_ASSERT_TIME(0, 0, 0, 0, 0, 0, current_time);
+}
+
+//(SI)‣ Fijar la hora de la alarma y consultarla.
 void test_set_and_get_alarm_time(void) {
     static const clock_time_t alarm_time = {
         .time =
@@ -157,6 +172,7 @@ void test_set_and_get_alarm_time(void) {
     TEST_ASSERT_EQUAL_UINT8_ARRAY(alarm_time.bcd, retrieved.bcd, sizeof(clock_time_t));
 }
 
+// (SI)‣ Fijar la alarma y avanzar el reloj para que suene.
 void test_alarm_triggers_when_time_matches(void) {
     // Seteamos la hora actual
     static const clock_time_t target_time = {.time = {
@@ -187,6 +203,35 @@ void test_alarm_triggers_when_time_matches(void) {
     TEST_ASSERT_TRUE(ClockIsAlarmTriggered(clock)); // Debería sonar
 }
 
+//(SI) ‣ Fijar la alarma, deshabilitarla y avanzar el reloj para no suene.
+void test_alarm_not_triggers_when_time_matches(void) {
+    // Seteamos la hora actual
+    static const clock_time_t target_time = {.time = {
+                                                 .seconds = {0, 0},
+                                                 .minutes = {1, 0},
+                                                 .hours = {0, 0},
+                                             }};
+
+    TEST_ASSERT_TRUE(ClockSetTime(clock, &(clock_time_t){
+                                             .time =
+                                                 {
+                                                     .seconds = {0, 0},
+                                                     .minutes = {9, 5},
+                                                     .hours = {3, 2},
+                                                 }
+                                             // 23:59:00 para probar rollover también
+                                         }));
+
+    TEST_ASSERT_TRUE(ClockSetAlarmTime(clock, &target_time));
+    ClockDisableAlarm(clock);                      // Aseguro que esté desactivada
+    TEST_ASSERT_FALSE(ClockIsAlarmEnabled(clock)); // Verifico que la alarma esté deshabilitada
+
+    // Simular el tiempo hasta alcanzar 00:01:00
+    SimulateSeconds(clock, 120);                     // Simula 2 minutos
+    TEST_ASSERT_FALSE(ClockIsAlarmTriggered(clock)); // Debería no sonar
+}
+
+// (SI) Hacer sonar la alarma y posponerla.
 void test_snoozed_alarm_triggers_after_delay(void) {
     // Seteamos la hora actual
     static const clock_time_t target_time = {.time = {
@@ -224,6 +269,42 @@ void test_snoozed_alarm_triggers_after_delay(void) {
 
     // Simular hasta que suene el pospuesto
     SimulateSeconds(clock, 120);
+    TEST_ASSERT_TRUE(ClockIsAlarmTriggered(clock));
+}
+
+//(SI) Hacer sonar la alarma y cancelarla hasta el otro dia..
+void test_alarm_can_be_cancelled_until_next_day(void) {
+    // Configurar la alarma para sonar a las 00:01:00
+    static const clock_time_t target_time = {.time = {
+                                                 .seconds = {0, 0},
+                                                 .minutes = {1, 0},
+                                                 .hours = {0, 0},
+                                             }};
+
+    // Inicializamos el reloj a 23:59:00
+    TEST_ASSERT_TRUE(ClockSetTime(clock, &(clock_time_t){.time = {
+                                                             .seconds = {0, 0},
+                                                             .minutes = {9, 5},
+                                                             .hours = {3, 2},
+                                                         }}));
+
+    TEST_ASSERT_TRUE(ClockSetAlarmTime(clock, &target_time));
+    ClockEnableAlarm(clock);
+
+    // Simular 2 minutos (hasta las 00:01:00)
+    SimulateSeconds(clock, 120);
+    TEST_ASSERT_TRUE(ClockIsAlarmTriggered(clock)); // La alarma debería sonar
+
+    // Cancelamos la alarma (detenemos su sonido)
+    TEST_ASSERT_TRUE(ClockCancelAlarmUntilNextDay(clock));
+    TEST_ASSERT_FALSE(ClockIsAlarmTriggered(clock)); // Ya no debería sonar
+
+    // Simulamos otro día: 00:01:00 de nuevo
+    clock_time_t zero_time = {0};
+    TEST_ASSERT_TRUE(ClockSetTime(clock, &zero_time));
+    SimulateSeconds(clock, 60);
+
+    // Debería volver a sonar
     TEST_ASSERT_TRUE(ClockIsAlarmTriggered(clock));
 }
 

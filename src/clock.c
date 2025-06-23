@@ -26,8 +26,6 @@ SPDX-License-Identifier: MIT
 #include <stddef.h>
 #include <string.h>
 
-#include <stdio.h>
-
 /* === Headers files inclusions ==================================================================================== */
 
 /* === Header for C++ compatibility ================================================================================ */
@@ -113,7 +111,7 @@ void ClockNewTick(clock_t self) {
                         }
                         // Rollover horas completo (23:59:59 -> 00:00:00)
                         if (self->current_time.time.hours[1] > 2 ||
-                            (self->current_time.time.hours[1] == 2 && self->current_time.time.hours[0] >= 1)) {
+                            (self->current_time.time.hours[1] == 2 && self->current_time.time.hours[0] > 3)) {
                             // Volver a 00:00:00 si pasa de 23:59:59
                             // memset(&self->current_time, 0, sizeof(clock_time_t)); ->NO USO PORQUE ME PUEDE ROMPER
                             // LA ALARMA
@@ -189,7 +187,7 @@ bool ClockTimesMatch(const clock_time_t * a, const clock_time_t * b) {
 }
 
 bool ClockSnoozeAlarm(clock_t self, uint8_t minutes_to_snooze) {
-    printf("ClockSnoozeAlarm called - valid: %d, snooze mins: %d\n", self ? self->valid : -1, minutes_to_snooze);
+
     if (!self || !self->valid || minutes_to_snooze == 0) {
         return false;
     }
@@ -218,10 +216,19 @@ bool ClockSnoozeAlarm(clock_t self, uint8_t minutes_to_snooze) {
     self->snoozed_time.time.seconds[1] = 0;
     self->snoozed_time.time.seconds[0] = 0;
 
-    printf("Alarm snoozed to: %d%d:%d%d\n", self->snoozed_time.time.hours[1], self->snoozed_time.time.hours[0],
-           self->snoozed_time.time.minutes[1], self->snoozed_time.time.minutes[0]);
     self->snoozed_active = true;
     self->alarm_triggered = false; // Reinicia la alarma al posponer
+
+    return true;
+}
+
+bool ClockCancelAlarmUntilNextDay(clock_t self) {
+    if (!self || !self->valid) {
+        return false;
+    }
+
+    self->alarm_triggered = false; // Detiene el sonido actual
+    self->snoozed_active = false;  // Por si estaba pospuesta
 
     return true;
 }

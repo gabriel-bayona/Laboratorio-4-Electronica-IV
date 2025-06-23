@@ -75,6 +75,8 @@ bool ClockIsAlarmTriggered(clock_t clock);
 bool ClockTimesMatch(const clock_time_t * a, const clock_time_t * b);
 
 bool ClockSnoozeAlarm(clock_t self, uint8_t minutes_to_snooze);
+
+bool ClockCancelAlarmUntilNextDay(clock_t self);
 /* === Public variable declarations ================================================================================ */
 
 /* === Public function declarations ================================================================================ */
