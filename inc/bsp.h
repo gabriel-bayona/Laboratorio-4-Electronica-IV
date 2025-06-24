@@ -39,7 +39,11 @@ extern "C" {
 /* === Public macros definitions =================================================================================== */
 
 /* === Public data type declarations =============================================================================== */
-//! Estructura que representa la placa de desarrollo.
+
+/**
+ * @brief Estructura que representa la placa de desarrollo.
+ * @details Esta estructura contiene los componentes digitales y la pantalla asociados a la placa.
+ */
 typedef struct Board_s {
     digital_output_t buzzer;
     digital_input_t set_time;

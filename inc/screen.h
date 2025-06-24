@@ -48,19 +48,40 @@ extern "C" {
 
 /* === Public data type declarations =============================================================================== */
 
-//!< Estructura que representa la pantalla de 7 segmentos.
+/*
+ * @brief Estructura que representa el estado de un dígito en la pantalla de 7 segmentos.
+ * @details Esta estructura contiene un valor BCD y un indicador de punto decimal.
+ */
 typedef struct screen_s * screen_t; //
 
-//!< Controlador de dígitos. (Apaga todos los dígitos).
+/*
+ * @brief Tipo de función para apagar todos los dígitos de la pantalla.
+ * @details Esta función se utiliza para apagar todos los dígitos de la pantalla de 7 segmentos.
+ * @note Se debe implementar en el controlador de pantalla.
+ */
 typedef void (*digits_turn_off_t)(void);
 
-//!< Controlador de segmentos. (Actualiza los segmentos de un dígito específico).
+/*
+ * @brief Tipo de función para actualizar los segmentos de un dígito en la pantalla.
+ * @details Esta función se utiliza para actualizar los segmentos de un dígito específico en la pantalla de 7 segmentos.
+ * @param digit El número del dígito a actualizar (0 a N-1, donde N es el número total de dígitos).
+ * @note Se debe implementar en el controlador de pantalla.
+ */
 typedef void (*segments_update_t)(uint8_t);
 
-//!< Controlador de dígitos. (Enciende digitos).
+/*
+ * @brief Tipo de función para encender un dígito específico en la pantalla.
+ * @details Esta función se utiliza para encender un dígito específico en la pantalla de 7 segmentos.
+ * @param digit El número del dígito a encender (0 a N-1, donde N es el número total de dígitos).
+ * @note Se debe implementar en el controlador de pantalla.
+ */
 typedef void (*digit_turn_on_t)(uint8_t);
 
-//!< Estructura que representa un controlador de pantalla.
+/**
+ * @brief Estructura que representa un controlador de pantalla de 7 segmentos.
+ * @details Esta estructura contiene punteros a funciones que permiten interactuar con la pantalla.
+ * @note Se debe implementar en el controlador de pantalla.
+ */
 typedef struct screen_driver_s {
     digits_turn_off_t DigitsTurnOff;
     segments_update_t SegmentsUpdate;
