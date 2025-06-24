@@ -25,10 +25,18 @@ SPDX-License-Identifier: MIT
 #include "clock.h"
 #include <stddef.h>
 #include <string.h>
-
-/* === Headers files inclusions ==================================================================================== */
+#include <stdlib.h>
 
 /* === Header for C++ compatibility ================================================================================ */
+
+/* === Private macros definitions ================================================================================ */
+/* === Private data type declarations ========================================================== */
+
+/* === Private variable declarations =========================================================== */
+
+/* === Private function declarations =========================================================== */
+
+static bool IsValidTime(const clock_time_t * time);
 
 /* === Public macros definitions =================================================================================== */
 
@@ -38,10 +46,38 @@ SPDX-License-Identifier: MIT
 
 /* === Public function declarations ================================================================================ */
 
+/* === Public variable definitions ============================================================= */
+
+/* === Private variable definitions ============================================================ */
+
+/* === Private function implementation ========================================================= */
+
+static bool IsValidTime(const clock_time_t * time) {
+    if (!time)
+        return false;
+
+    // validacion de segundos
+    if (time->time.seconds[0] > 9 || time->time.seconds[1] > 5)
+        return false;
+
+    // validacion de minutos
+    if (time->time.minutes[0] > 9 || time->time.minutes[1] > 5)
+        return false;
+
+    // validacion de horas
+    if (time->time.hours[0] > 9 || time->time.hours[1] > 2 || (time->time.hours[1] == 2 && time->time.hours[0] > 3)) {
+        return false;
+    }
+
+    return true;
+}
+
+/* === Public function implementation ========================================================= */
 struct clock_s {
     uint16_t clock_ticks;
     clock_time_t current_time;
     bool valid;
+    uint8_t ticks_per_second;
 
     // De aca en adelante es parte de la alarma
     clock_time_t alarm_time;
@@ -52,9 +88,18 @@ struct clock_s {
 };
 
 clock_t ClockCreate(uint8_t ticks_per_second) {
-    (void)ticks_per_second; // Evita advertencias de compilación si no se usa
-    static struct clock_s self[1];
-    memset(self, 0, sizeof(struct clock_s));
+
+    if (ticks_per_second < 1) {
+        return NULL; // No se puede crear un reloj con menos de 1 tick por segundo
+    }
+
+    clock_t self = malloc(sizeof(struct clock_s));
+    if (self == NULL) {
+        return NULL;
+    }
+    memset(self, 0, sizeof(struct clock_s)); // Inicializar a cero
+
+    self->ticks_per_second = ticks_per_second;
     self->valid = false;
 
     // Alarma
@@ -65,14 +110,17 @@ clock_t ClockCreate(uint8_t ticks_per_second) {
 }
 
 bool ClockGetTime(clock_t self, clock_time_t * result) {
+    if (!self || !result) {
+        return false;
+    }
+
     memcpy(result, &self->current_time, sizeof(clock_time_t));
     return self->valid;
 }
 
 bool ClockSetTime(clock_t self, const clock_time_t * new_time) {
-    self->valid = true;
-    memcpy(&self->current_time, new_time, sizeof(clock_time_t));
-    return self->valid; // siempre devuelve true
+    return self && new_time && IsValidTime(new_time) && (self->valid = true) &&
+           memcpy(&self->current_time, new_time, sizeof *new_time);
 }
 
 void ClockNewTick(clock_t self) {
@@ -80,7 +128,7 @@ void ClockNewTick(clock_t self) {
         return;
     // Incrementar el contador de ticks del reloj
     self->clock_ticks++;
-    if (self->clock_ticks == 5) {
+    if (self->clock_ticks == self->ticks_per_second) {
         self->clock_ticks = 0;
         self->current_time.time.seconds[0]++;
 
@@ -141,9 +189,10 @@ void ClockNewTick(clock_t self) {
 
 // Guarda una copia de la hora de la alarma (alarm_time) en el reloj.
 bool ClockSetAlarmTime(clock_t self, const clock_time_t * alarm_time) {
-    if (!self || !alarm_time) {
+    if (!self || !alarm_time || !IsValidTime(alarm_time)) {
         return false;
     }
+
     memcpy(&self->alarm_time, alarm_time, sizeof(clock_time_t));
     return true;
 }
@@ -158,13 +207,14 @@ bool ClockGetAlarmTime(clock_t self, clock_time_t * alarm_time) {
 }
 
 void ClockEnableAlarm(clock_t self) {
-    if (self) {
+
+    if (self && self->valid) {
         self->alarm_enabled = true;
     }
 }
 
 void ClockDisableAlarm(clock_t self) {
-    if (self) {
+    if (self && self->valid) {
         self->alarm_enabled = false;
     }
 }

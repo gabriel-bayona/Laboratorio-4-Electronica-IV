@@ -34,13 +34,29 @@ SPDX-License-Identifier: MIT
 extern "C" {
 #endif
 
+/* === Private macros definitions ================================================================================ */
+/* === Private data type declarations ========================================================== */
+
+/* === Private variable declarations =========================================================== */
+
+/* === Private function declarations =========================================================== */
+
 /* === Public macros definitions =================================================================================== */
 
 /* === Public data type declarations =============================================================================== */
-/* @brief Estructura que representa el reloj.
- * Contiene la hora actual, la hora de la alarma, y el estado de la alarma.
 
- */
+/**
+ * @brief Estructura que representa el tiempo del reloj en formato BCD.
+ *
+ * La estructura contiene campos para los segundos, minutos y horas, cada uno representado
+ * como un arreglo de dos bytes (unidades y decenas).
+ *
+ * @note Los valores se almacenan en formato BCD (Binary-Coded Decimal).
+ * @param seconds Arreglo de dos bytes para los segundos (unidades y decenas).
+ * @param minutes Arreglo de dos bytes para los minutos (unidades y decenas).
+ * @param hours Arreglo de dos bytes para las horas (unidades y decenas).
+
+ * */
 typedef union {
     struct {
         uint8_t seconds[2];
@@ -52,30 +68,111 @@ typedef union {
 
 typedef struct clock_s * clock_t;
 
+/*Constructor de reloj
+ * @param ticks_per_second Frecuencia del reloj en ticks por segundo.
+ * @return Un puntero a una instancia de reloj inicializada.
+ */
 clock_t ClockCreate(uint8_t ticks_per_second);
 
+/**
+ * @brief Obtiene la hora actual del reloj.
+ *
+ * @param clock Puntero al reloj del cual se desea obtener la hora.
+ * @param result Puntero donde se almacenará la hora actual.
+ * @return true si la operación fue exitosa, false en caso contrario.
+ */
 bool ClockGetTime(clock_t clock, clock_time_t * result);
 
+/**
+ * @brief Establece la hora del reloj.
+ *
+ * @param clock Puntero al reloj donde se desea establecer la hora.
+ * @param new_time Puntero a la nueva hora que se desea establecer.
+ * @return true si la operación fue exitosa, false si el tiempo es inválido o si el reloj es NULL.
+ */
 bool ClockSetTime(clock_t clock, const clock_time_t * new_time);
 
+/**
+ * @brief Establece la hora de la alarma en el reloj.
+ *
+ * @param clock Puntero al reloj donde se desea establecer la hora de la alarma.
+ * @param alarm_time Puntero a la nueva hora de la alarma que se desea establecer.
+ * @return true si la operación fue exitosa, false si el tiempo es inválido o si el reloj es NULL.
+ */
 bool ClockSetAlarmTime(clock_t clock, const clock_time_t * alarm_time);
 
+/**
+ * @brief Simula un tick del reloj, actualizando la hora y verificando si la alarma debe sonar.
+ *
+ * @param clock Puntero al reloj que se desea actualizar.
+ */
 void ClockNewTick(clock_t clock);
 
+/**
+ * @brief Obtiene la hora de la alarma del reloj.
+ *
+ * @param clock Puntero al reloj del cual se desea obtener la hora de la alarma.
+ * @param alarm_time Puntero donde se almacenará la hora de la alarma.
+ * @return true si la operación fue exitosa, false si el reloj es NULL o si alarm_time es NULL.
+ */
 bool ClockGetAlarmTime(clock_t clock, clock_time_t * alarm_time);
 
+/**
+ * @brief Habilita la alarma del reloj.
+ *
+ * @param clock Puntero al reloj donde se desea habilitar la alarma.
+ */
 void ClockEnableAlarm(clock_t clock);
 
+/**
+ * @brief Deshabilita la alarma del reloj.
+ *
+ * @param clock Puntero al reloj donde se desea deshabilitar la alarma.
+ */
 void ClockDisableAlarm(clock_t clock);
 
+/**
+ * @brief Verifica si la alarma del reloj está habilitada.
+ *
+ * @param clock Puntero al reloj que se desea verificar.
+ * @return true si la alarma está habilitada, false en caso contrario.
+ */
 bool ClockIsAlarmEnabled(clock_t clock);
 
+/**
+ * @brief Verifica si la alarma del reloj está sonando.
+ *
+ * @param clock Puntero al reloj que se desea verificar.
+ * @return true si la alarma está sonando, false en caso contrario.
+ */
 bool ClockIsAlarmTriggered(clock_t clock);
 
+/**
+ * @brief Compara dos tiempos del reloj para verificar si son iguales.
+ *
+ * @param a Puntero al primer tiempo a comparar.
+ * @param b Puntero al segundo tiempo a comparar.
+ * @return true si los tiempos son iguales, false en caso contrario.
+ */
 bool ClockTimesMatch(const clock_time_t * a, const clock_time_t * b);
 
+/**
+ * @brief Pospone la alarma del reloj por una cantidad específica de minutos.
+ *
+ * @param clock Puntero al reloj donde se desea posponer la alarma.
+ * @param minutes_to_snooze Cantidad de minutos para posponer la alarma.
+ * @return true si la operación fue exitosa, false si el reloj es NULL o si los minutos son inválidos.
+ */
 bool ClockSnoozeAlarm(clock_t self, uint8_t minutes_to_snooze);
 
+/**
+ * @brief Cancela la alarma del reloj hasta el próximo día.
+ *
+ * Esta función detiene el sonido actual de la alarma y desactiva la alarma pospuesta.
+ *
+ * @param self Puntero al reloj donde se desea cancelar la alarma.
+ * @return true si la operación fue exitosa, false si el reloj es NULL o no es válido.
+ */
 bool ClockCancelAlarmUntilNextDay(clock_t self);
 /* === Public variable declarations ================================================================================ */
 
