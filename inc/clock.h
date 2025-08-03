@@ -45,6 +45,23 @@ extern "C" {
 
 /* === Public data type declarations =============================================================================== */
 
+/** @brief Modo del sistema para la configuración del reloj y la alarma.
+ *
+ * Este enum define los diferentes modos en los que el sistema puede operar,
+ * permitiendo al usuario configurar la hora actual, la hora de la alarma,
+ * o simplemente visualizar el tiempo.
+ */
+
+typedef enum {
+    MODE_UNSET,
+    MODE_HOME, // Modo de visualización del tiempo actual
+    MODE_SET_TIME_MINUTES,
+    MODE_SET_TIME_HOURS,
+    MODE_SET_ALARM_MINUTES,
+    MODE_SET_ALARM_HOURS,
+    MODE_ALARM_TRIGGERED, // Modo alarma activada
+} system_mode_t;
+
 /**
  * @brief Estructura que representa el tiempo del reloj en formato BCD.
  *
@@ -72,7 +89,7 @@ typedef struct clock_s * clock_t;
  * @param ticks_per_second Frecuencia del reloj en ticks por segundo.
  * @return Un puntero a una instancia de reloj inicializada.
  */
-clock_t ClockCreate(uint8_t ticks_per_second);
+clock_t ClockCreate(uint16_t ticks_per_second);
 
 /**
  * @brief Obtiene la hora actual del reloj.

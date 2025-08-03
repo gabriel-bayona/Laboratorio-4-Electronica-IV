@@ -130,10 +130,9 @@ void ScreenRefresh(screen_t screen) {
                 }
             }
         }
-
-        screen->driver->SegmentsUpdate(segments);
-        screen->driver->DigitTurnOn(screen->currentDigit);
     }
+    screen->driver->SegmentsUpdate(segments);
+    screen->driver->DigitTurnOn(screen->currentDigit);
 }
 
 int DisplayFlashDigits(screen_t screen, uint8_t from, uint8_t to, uint16_t divisor) {
@@ -149,6 +148,12 @@ int DisplayFlashDigits(screen_t screen, uint8_t from, uint8_t to, uint16_t divis
         screen->flashing_count = 0;
     }
     return result;
+}
+
+void ScreenToggleDot(screen_t screen, uint8_t position) {
+    if (position < SCREEN_MAX_DIGITS) {
+        screen->value_dot[position] ^= SEGMENT_P;
+    }
 }
 
 /* === End of documentation ========================================================================================

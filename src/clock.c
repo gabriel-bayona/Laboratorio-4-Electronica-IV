@@ -87,7 +87,7 @@ struct clock_s {
     bool snoozed_active;       // Indica si la alarma pospuesta esta activa
 };
 
-clock_t ClockCreate(uint8_t ticks_per_second) {
+clock_t ClockCreate(uint16_t ticks_per_second) {
 
     if (ticks_per_second < 1) {
         return NULL; // No se puede crear un reloj con menos de 1 tick por segundo
@@ -119,8 +119,14 @@ bool ClockGetTime(clock_t self, clock_time_t * result) {
 }
 
 bool ClockSetTime(clock_t self, const clock_time_t * new_time) {
-    return self && new_time && IsValidTime(new_time) && (self->valid = true) &&
-           memcpy(&self->current_time, new_time, sizeof *new_time);
+    if (!self || !new_time || !IsValidTime(new_time)) {
+        return false;
+    }
+
+    memcpy(&self->current_time, new_time, sizeof(*new_time));
+    self->valid = true;
+
+    return true;
 }
 
 void ClockNewTick(clock_t self) {

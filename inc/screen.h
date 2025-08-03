@@ -130,6 +130,14 @@ void ScreenRefresh(screen_t screen); //
  * @param screen Identificador de la pantalla.
  */
 int DisplayFlashDigits(screen_t screen, uint8_t from, uint8_t to, uint16_t divisor);
+
+/**
+ * @brief  Parpadeo del punto indicado en la pantalla
+ *
+ * @param screen Pantalla
+ * @param position  Posicion del punto al que se quiere parpadear [0,1,2,3].
+ */
+void ScreenToggleDot(screen_t screen, uint8_t position);
 /* === End of conditional blocks =================================================================================== */
 #ifdef __cplusplus
 }

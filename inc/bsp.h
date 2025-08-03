@@ -57,10 +57,17 @@ typedef struct Board_s {
     digital_output_t led_blue;
 
     screen_t screen;
-} const * const Board_t;
+} const * Board_t;
 /* === Public variable declarations ================================================================================ */
 
 /* === Public function declarations ================================================================================ */
+
+/**
+ * @brief Inicializa el temporizador del sistema.
+ * @param ticks Cantidad de ticks por segundo.
+ * @note Esta función configura el temporizador del sistema para generar interrupciones a intervalos regulares.
+ */
+void SysTickInit(uint16_t ticks);
 
 /**
  * @brief Crea e instancia la estructura que representa la placa de desarrollo.

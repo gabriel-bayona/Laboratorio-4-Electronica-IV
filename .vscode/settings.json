@@ -59,7 +59,8 @@
   "files.associations": {
     "digital.h": "c",
     "stdbool.h": "c",
-    "chrono": "c"
+    "chrono": "c",
+    "*.inc": "c"
   },
   "C_Cpp.errorSquiggles": "disabled"
 }
