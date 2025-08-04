@@ -77,7 +77,7 @@ struct clock_s {
     uint16_t clock_ticks;
     clock_time_t current_time;
     bool valid;
-    uint8_t ticks_per_second;
+    uint16_t ticks_per_second;
 
     // De aca en adelante es parte de la alarma
     clock_time_t alarm_time;

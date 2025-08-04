@@ -44,7 +44,7 @@
 #include "clock.h"
 
 /* === Private data type declarations ========================================================== */
-#define CLOCK_TICKS_PER_SECOND 1000
+
 /* === Private variable declarations =========================================================== */
 
 /* === Private function declarations =========================================================== */
@@ -344,6 +344,7 @@ void SysTick_Handler(void) {
     ScreenRefresh(board->screen);
     ScreenWriteBCD(board->screen, digits, sizeof(digits));
     ScreenWriteDOT(board->screen, dots, sizeof(dots));
+
     tick_count = (tick_count + 1) % 1000;
     if (tick_count < 500) {
         ScreenToggleDot(board->screen, 1);
