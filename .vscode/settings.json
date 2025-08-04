@@ -60,7 +60,8 @@
     "digital.h": "c",
     "stdbool.h": "c",
     "chrono": "c",
-    "*.inc": "c"
+    "*.inc": "c",
+    "*.def": "c"
   },
   "C_Cpp.errorSquiggles": "disabled"
 }

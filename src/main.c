@@ -64,9 +64,10 @@ clock_time_t current_time; // Variable global para la hora actual del reloj
 clock_time_t alarm_time;   // Variable global para la hora de la alarma
 
 uint8_t digits[4] = {0, 0, 0, 0}; // Dígitos para mostrar la hora
-uint8_t dots[4];
+uint8_t dots[4] = {0, 1, 0, 0};
 uint8_t dot_alarm[4];
 uint8_t last_state;
+uint16_t ticks = 1000;
 
 bool segundo;
 /* === Private variable definitions ============================================================ */
@@ -111,9 +112,10 @@ int main(void) {
 
     // Inicializar el sistema
     board = BoardCreate();
-    clock = ClockCreate(1000); // Crea el reloj con la frecuencia especificada (ticks por segundo)
+    clock = ClockCreate(ticks); // Crea el reloj con la frecuencia especificada (ticks por segundo)
 
-    SysTickInit(1000);
+    SysTickInit(ticks);
+    DisplayFlashDigits(board->screen, 0, 3, 100);
 
     while (true) {
 
@@ -124,36 +126,38 @@ int main(void) {
                 if (ClockGetAlarmTime(clock, &alarm_time)) {
                     timeToValue(digits, &alarm_time); // Convierte la hora de la alarma a dígitos
                 }
-
+                if (ClockIsAlarmEnabled(clock)) {
+                    dots[0] = 1;
+                }
                 mode = MODE_SET_ALARM_MINUTES;
                 last_state = MODE_UNSET;
+                DisplayFlashDigits(board->screen, 2, 3, 100);
 
             } else if (DigitalInputWasDeactivated(board->set_time)) {
 
                 mode = MODE_SET_TIME_MINUTES;
                 last_state = MODE_UNSET;
+                DisplayFlashDigits(board->screen, 2, 3, 100);
             }
             break;
 
         case MODE_HOME:
             if (ClockGetTime(clock, &current_time)) {
                 timeToValue(digits, &current_time); // Convierte la hora actual a dígitos
-                // DigitalOutputActivate(board->led_green);
-                // DigitalOutputDeactivate(board->led_blue);
-            } else {
-                // DigitalOutputActivate(board->led_blue);
-                // DigitalOutputDeactivate(board->led_green);
             }
-
             ScreenWriteBCD(board->screen, digits, sizeof(digits));
             if (DigitalInputWasDeactivated(board->set_time)) {
-                // if (segundosAntibounce(DigitalInputGetIsActive(board->set_time), 1)) {
+                DisplayFlashDigits(board->screen, 2, 3, 100);
                 mode = MODE_SET_TIME_MINUTES;
                 last_state = MODE_HOME;
+
             } else if (DigitalInputWasDeactivated(board->set_alarm)) {
-                // else if (segundosAntibounce(DigitalInputGetIsActive(board->set_alarm), 1)) {
+                DisplayFlashDigits(board->screen, 2, 3, 100);
                 if (ClockGetAlarmTime(clock, &alarm_time)) {
                     timeToValue(digits, &alarm_time); // Convierte la hora de la alarma a dígitos
+                }
+                if (ClockIsAlarmEnabled(clock)) {
+                    dots[0] = 1;
                 }
                 mode = MODE_SET_ALARM_MINUTES;
                 last_state = MODE_HOME;
@@ -162,15 +166,24 @@ int main(void) {
             // verificacion de la alarma
             if (ClockIsAlarmTriggered(clock)) {
                 mode = MODE_ALARM_TRIGGERED;
+                DigitalOutputActivate(board->led_blue);
             }
 
+            // activar y desactivar la alarma
+            if (DigitalInputWasDeactivated(board->accept)) {
+                ClockEnableAlarm(clock);
+            } else if (DigitalInputWasDeactivated(board->cancel)) {
+                ClockDisableAlarm(clock);
+            }
             break;
 
         case MODE_SET_TIME_MINUTES:
             if (DigitalInputWasDeactivated(board->cancel)) {
                 if (last_state == MODE_UNSET) {
+                    DisplayFlashDigits(board->screen, 0, 3, 100);
                     mode = MODE_UNSET; // Cancelar y volver al modo UNSET
                 } else {
+                    DisplayFlashDigits(board->screen, 0, 0, 0);
                     mode = MODE_HOME; // Cancelar y volver al modo HOME
                 }
             }
@@ -188,7 +201,9 @@ int main(void) {
                 digits[3] = minutos % 10;                     // Y unidades
             }
             if (DigitalInputWasDeactivated(board->accept)) {
+                DisplayFlashDigits(board->screen, 0, 1, 100);
                 mode = MODE_SET_TIME_HOURS; // Cambia al modo de ajuste de horas
+                DisplayFlashDigits(board->screen, 0, 1, 100);
             }
             break;
 
@@ -196,8 +211,10 @@ int main(void) {
 
             if (DigitalInputWasDeactivated(board->cancel)) {
                 if (last_state == MODE_UNSET) {
+                    DisplayFlashDigits(board->screen, 0, 3, 100);
                     mode = MODE_UNSET; // Cancelar y volver al modo UNSET
                 } else {
+                    DisplayFlashDigits(board->screen, 0, 0, 0);
                     mode = MODE_HOME; // Cancelar y volver al modo HOME
                 }
             }
@@ -216,6 +233,7 @@ int main(void) {
             }
 
             if (DigitalInputWasDeactivated(board->accept)) {
+                DisplayFlashDigits(board->screen, 0, 0, 0);
                 valueToTime(digits, &current_time); // Convierte los dígitos a tiempo actual
                 if (ClockSetTime(clock, &current_time)) {
                     mode = MODE_HOME; // Vuelve al modo HOME después de aceptar
@@ -228,9 +246,12 @@ int main(void) {
 
         case MODE_SET_ALARM_MINUTES:
             if (DigitalInputWasDeactivated(board->cancel)) {
+                dots[0] = 0;
                 if (last_state == MODE_UNSET) {
+                    DisplayFlashDigits(board->screen, 0, 3, 100);
                     mode = MODE_UNSET; // Cancelar y volver al modo UNSET
                 } else {
+                    DisplayFlashDigits(board->screen, 0, 0, 0);
                     mode = MODE_HOME; // Cancelar y volver al modo HOME
                 }
             }
@@ -248,14 +269,18 @@ int main(void) {
                 digits[3] = minutos % 10;                     // Y unidades
             }
             if (DigitalInputWasDeactivated(board->accept)) {
+                DisplayFlashDigits(board->screen, 0, 1, 100);
                 mode = MODE_SET_ALARM_HOURS;
             }
             break;
         case MODE_SET_ALARM_HOURS:
             if (DigitalInputWasDeactivated(board->cancel)) {
+                dots[0] = 0;
                 if (last_state == MODE_UNSET) {
+                    DisplayFlashDigits(board->screen, 0, 3, 100);
                     mode = MODE_UNSET; // Cancelar y volver al modo UNSET
                 } else {
+                    DisplayFlashDigits(board->screen, 0, 0, 0);
                     mode = MODE_HOME; // Cancelar y volver al modo HOME
                 }
             }
@@ -272,15 +297,17 @@ int main(void) {
                 digits[1] = horas % 10;                     // Y unidades
             }
             if (DigitalInputWasDeactivated(board->accept)) {
-
+                dots[0] = 0;
                 valueToTime(digits, &alarm_time); // Convierte los dígitos a tiempo de alarma
                 if (ClockSetAlarmTime(clock, &alarm_time)) {
+                    DisplayFlashDigits(board->screen, 0, 0, 0);
                     ClockEnableAlarm(clock); // Habilita la alarma
-                    mode = MODE_HOME;        // Vuelve al modo HOME después de aceptar
-
-                } else {
-                    DigitalOutputActivate(board->led_blue); // Indica error al configurar la alarma
-                    DigitalOutputDeactivate(board->led_green);
+                    if (last_state != MODE_UNSET) {
+                        mode = MODE_HOME;
+                    } else {
+                        mode = MODE_UNSET;
+                        DisplayFlashDigits(board->screen, 0, 3, 100);
+                    }
                 }
             }
 
@@ -294,10 +321,13 @@ int main(void) {
                 // Cancelar la alarma y volver al modo HOME
                 ClockCancelAlarmUntilNextDay(clock);
                 mode = MODE_HOME;
+                dots[3] = 0;
+
             } else if (DigitalInputWasDeactivated(board->accept)) {
                 // Posponer la alarma
                 if (ClockSnoozeAlarm(clock, 5)) { // Posponer 5 minutos
                     mode = MODE_HOME;             // Vuelve al modo HOME después de posponer
+                    dots[3] = 0;
                 }
             }
         }
@@ -307,6 +337,7 @@ int main(void) {
         }
     }
 }
+
 void SysTick_Handler(void) {
     static uint16_t tick_count = 0;
 
@@ -314,32 +345,15 @@ void SysTick_Handler(void) {
     ScreenWriteBCD(board->screen, digits, sizeof(digits));
     ScreenWriteDOT(board->screen, dots, sizeof(dots));
     tick_count = (tick_count + 1) % 1000;
-    if (tick_count >= 500) {
-
-        if (mode == MODE_HOME) {
-            DisplayFlashDigits(board->screen, 0, 0, 0);
-            ScreenToggleDot(board->screen, 1);
-        } else if (mode == MODE_SET_TIME_MINUTES || mode == MODE_SET_ALARM_MINUTES) {
-            DisplayFlashDigits(board->screen, 2, 3, 100);
-        } else if (mode == MODE_SET_ALARM_HOURS || mode == MODE_SET_TIME_HOURS) {
-            DisplayFlashDigits(board->screen, 0, 1, 100);
-        } else if (mode == MODE_UNSET) {
-            DisplayFlashDigits(board->screen, 0, 3, 100);
-        } else if (mode == MODE_ALARM_TRIGGERED) {
-            ScreenToggleDot(board->screen, 3);
+    if (tick_count < 500) {
+        ScreenToggleDot(board->screen, 1);
+        if (mode == MODE_ALARM_TRIGGERED) {
+            dots[3] = 1;
         }
     }
 
     ClockNewTick(clock); // la validacion ya es interna al reloj, no hace falta validar aca
     ClockGetTime(clock, &current_time);
-    /* if (ClockGetTime(clock, &current_time)) {
-        timeToValue(digits, &current_time);
-        DigitalOutputDeactivate(board->led_red);
-        DigitalOutputActivate(board->led_green);
-    } else {
-        DigitalOutputActivate(board->led_red);
-        DigitalOutputDeactivate(board->led_green);
-    } */
 }
 
 /* === End of documentation ==================================================================== */
