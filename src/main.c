@@ -51,9 +51,9 @@
 
 void valueToTime(uint8_t * digits, clock_time_t * time);
 void timeToValue(uint8_t * digits, clock_time_t * time);
-// void nextState(void);
 
-bool segundosAntibounce(bool teclaPresionada, uint8_t segundosNecesarios);
+uint32_t ClockGetTicks(void);
+bool milisegundosAntibounce(digital_input_t boton, uint32_t msNecesarios);
 
 /* === Public variable definitions ============================================================= */
 
@@ -65,9 +65,10 @@ clock_time_t alarm_time;   // Variable global para la hora de la alarma
 
 uint8_t digits[4] = {0, 0, 0, 0}; // Dígitos para mostrar la hora
 uint8_t dots[4] = {0, 1, 0, 0};
-uint8_t dot_alarm[4];
+
 uint8_t last_state;
 uint16_t ticks = 1000;
+static volatile uint32_t systemTicks = 0;
 
 bool segundo;
 /* === Private variable definitions ============================================================ */
@@ -90,20 +91,63 @@ void timeToValue(uint8_t * digits, clock_time_t * time) {
     digits[3] = time->bcd[2]; // minutos unidades
 }
 
-bool segundosAntibounce(bool teclaPresionada, uint8_t segundosNecesarios) {
-    static uint32_t press_time = 0;
+uint32_t ClockGetTicks(void) {
+    return systemTicks;
+}
 
-    if (teclaPresionada && segundo) {
-        if (press_time == segundosNecesarios) {
-            return true; // La tecla se mantuvo presionada el tiempo necesario
-        } else {
-            press_time++;
-            return false; // La tecla aún no ha sido presionada el tiempo necesario
+bool milisegundosAntibounce(digital_input_t boton, uint32_t msNecesarios) {
+    static uint32_t tiempoInicio = 0;
+    static uint32_t tiempoUltimoCambio = 0;
+    static bool contando = false;
+    static bool autorizar = false;
+    static bool terminado = false;
+
+    uint32_t tiempoActual = ClockGetTicks();
+    digital_states_t cambio = DigitalInputWasChanged(boton);
+    bool presionado = DigitalInputGetIsActive(boton);
+
+    // Si ya se activó y no queremos repetir
+    if (terminado) {
+        // Esperar que el botón sea liberado para reiniciar todo
+        if (!presionado) {
+            contando = false;
+            autorizar = false;
+            terminado = false;
+        }
+        return false;
+    }
+
+    // Si hubo un cambio de estado (flanco), actualizamos tiempo
+    if (cambio != DIGITAL_INPUT_NO_CHANGE) {
+        tiempoUltimoCambio = tiempoActual;
+    }
+
+    // Si hubo demasiada inactividad (sin cambios), reseteamos
+    if ((tiempoActual - tiempoUltimoCambio) >= 200) {
+        contando = false;
+        autorizar = false;
+    }
+
+    if (presionado) {
+        if (!contando) {
+            tiempoInicio = tiempoActual;
+            tiempoUltimoCambio = tiempoActual;
+            contando = true;
+        } else if ((tiempoActual - tiempoInicio) >= msNecesarios) {
+            autorizar = true;
+            contando = false;
         }
     } else {
-        press_time = 0; // Reinicia el contador si la tecla no está presionada
-        return false;   // La tecla no está presionada
+        contando = false;
     }
+
+    if (autorizar) {
+        autorizar = false;
+        terminado = true;
+        return true;
+    }
+
+    return false;
 }
 
 /* === Public function implementation ========================================================= */
@@ -128,6 +172,11 @@ int main(void) {
                 }
                 if (ClockIsAlarmEnabled(clock)) {
                     dots[0] = 1;
+                } else {
+                    dots[0] = 1;
+                    dots[1] = 1;
+                    dots[2] = 1;
+                    dots[3] = 1;
                 }
                 mode = MODE_SET_ALARM_MINUTES;
                 last_state = MODE_UNSET;
@@ -247,6 +296,10 @@ int main(void) {
         case MODE_SET_ALARM_MINUTES:
             if (DigitalInputWasDeactivated(board->cancel)) {
                 dots[0] = 0;
+                dots[1] = 0;
+                dots[2] = 0;
+                dots[3] = 0;
+
                 if (last_state == MODE_UNSET) {
                     DisplayFlashDigits(board->screen, 0, 3, 100);
                     mode = MODE_UNSET; // Cancelar y volver al modo UNSET
@@ -276,6 +329,10 @@ int main(void) {
         case MODE_SET_ALARM_HOURS:
             if (DigitalInputWasDeactivated(board->cancel)) {
                 dots[0] = 0;
+                dots[0] = 0;
+                dots[1] = 0;
+                dots[2] = 0;
+                dots[3] = 0;
                 if (last_state == MODE_UNSET) {
                     DisplayFlashDigits(board->screen, 0, 3, 100);
                     mode = MODE_UNSET; // Cancelar y volver al modo UNSET
@@ -298,6 +355,10 @@ int main(void) {
             }
             if (DigitalInputWasDeactivated(board->accept)) {
                 dots[0] = 0;
+                dots[0] = 0;
+                dots[1] = 0;
+                dots[2] = 0;
+                dots[3] = 0;
                 valueToTime(digits, &alarm_time); // Convierte los dígitos a tiempo de alarma
                 if (ClockSetAlarmTime(clock, &alarm_time)) {
                     DisplayFlashDigits(board->screen, 0, 0, 0);
@@ -340,6 +401,7 @@ int main(void) {
 
 void SysTick_Handler(void) {
     static uint16_t tick_count = 0;
+    systemTicks++; // 1 ms por tick
 
     ScreenRefresh(board->screen);
     ScreenWriteBCD(board->screen, digits, sizeof(digits));
